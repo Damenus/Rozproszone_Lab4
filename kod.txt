@@ -1,0 +1,94 @@
+#include "stdafx.h"
+#include <iostream>
+#include <Windows.h>
+#include <stdio.h>
+#include <cmath>
+#include <math.h>
+#include <ctime>
+
+// wynik : 430
+
+using namespace std;
+
+struct dane {
+	int seed;
+	double wynik;
+}tab[10];
+
+double fun(int x) {
+
+	return pow(x, 0.75) + 40 * sin(x);
+
+}
+
+HANDLE watki[10];
+
+DWORD WINAPI funkcja_watku(void *arg);
+
+int main()
+{
+	DWORD id;
+	srand(time(NULL));
+	int x, y;
+	double ww = 0;
+	//dane tab;
+
+	for (int i = 0; i < 10; i++) {
+		//tab.x = rand() % 41; //zakres do 40
+		//tab.y = rand() % 81; //zakres do 80
+		tab[i].seed = rand();
+
+		watki[i] = CreateThread(NULL,0, funkcja_watku, (void*)&tab[i], 0,	&id);
+	}
+
+	Sleep(1000);
+
+	for (int i = 0; i < 10; i++) {
+		ww += tab[i].wynik;
+
+	}
+
+	cout << "Wynik: "<< ww / 10 << endl;
+
+	
+	return 0;
+}
+
+DWORD WINAPI funkcja_watku(void *arg) {
+
+	struct dane *tab = (struct dane*)arg;
+	srand(tab->seed);
+	int licz = 30000;
+	int x, y, j = 0;
+	double wynik_funkcji;
+	//x = tab->x;
+	//y = tab->y;
+
+
+	for (int i = 0; i < licz; i++) {
+
+		x = rand() % 41; //zakres do 40
+		y = rand() % 81; //zakres do 80
+		
+		wynik_funkcji = fun(x);
+
+		if (y <= wynik_funkcji) {
+			j++;
+		}
+		else if (wynik_funkcji < 0 && y <= abs(wynik_funkcji)) {
+			j--;
+		}
+
+
+	}
+
+
+	double cal = (double)j * 80 * 40 / licz;
+	cout << cal << endl;
+	tab->wynik = cal;
+
+	return 0;
+
+
+}
+
